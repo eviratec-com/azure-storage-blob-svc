@@ -1,0 +1,35 @@
+{
+  "name": "azure-storage-blob-svc",
+  "version": "1.0.0",
+  "description": "Web service to upload images to Azure Storage Blob",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/eviratec/azure-storage-blob-svc.git"
+  },
+  "keywords": [
+    "Azure",
+    "Storage",
+    "Blob",
+    "Webservice"
+  ],
+  "author": "Callan Peter Milne <callanpmilne@gmail.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@azure/storage-blob": "12.13.0",
+    "body-parser": "1.20.2",
+    "cookie-parser": "1.4.3",
+    "cors": "2.8.5",
+    "debug": "2.6.9",
+    "dotenv": "5.0.1",
+    "express": "4.18.2",
+    "into-stream": "3.1.0",
+    "morgan": "1.10.0",
+    "multer": "1.4.5-lts.1",
+    "serve-favicon": "2.4.5"
+  }
+}
