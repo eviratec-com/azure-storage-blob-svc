@@ -30,20 +30,29 @@ function uploadFile (file) {
     , streamLength = file.buffer.length
   ;
 
-  return blobService.uploadStream(stream, streamLength)
+  return {
+    blobName,
+    stream: blobService.uploadStream(stream, streamLength)
+  }
 }
 
 router.post('/', upload.array('files'), (req, res) => {
+  const resultUris = [];
   const files = [...req.files];
   const uploads = files.map(file => {
     console.log(file);
-    return uploadFile(file);
+    const upload = uploadFile(file)
+    resultUris.push(
+      `${process.env.AZURE_STORAGE_CONTAINER_URI_PREFIX}/${upload.blobName}`
+    )
+    return upload.stream;
   });
 
   Promise.all(uploads).then(
     ()=>{
       res.status(200).send({
-        message: 'File(s) uploaded to Azure Blob storage.'
+        message: 'File(s) uploaded to Azure Blob storage.',
+        uris: [...resultUris],
       });
     }
   ).catch(
