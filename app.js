@@ -25,6 +25,46 @@ app.use(cookieParser());
 
 app.use(cors(corsConfig));
 
+function verifyEviratecToken (req) {
+  return new Promise((resolve, reject) => {
+    const ep = process.env.EVIRATEC_TOKEN_VERIFICATION_ENDPOINT
+    const headers = {
+      'X-Eviratec-Token': req.headers['x-eviratec-token'],
+      'Content-Type': 'application/json',
+    }
+
+    fetch(ep, { method: 'GET', headers: headers })
+      .then((result) => {
+        if (400 === result.status) {
+          return result.json().then(json => {
+            const e = new Error(json.message)
+            reject(e)
+          })
+        }
+
+        result.json()
+          .then(json => resolve(json))
+          .catch(err => reject(err))
+      })
+      .catch(err => reject(err))
+  })
+}
+
+// verify auth
+app.use((req, res, next) => {
+  verifyEviratecToken(req)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((e) => {
+      console.log(e)
+      const err = new Error('Invalid Token');
+      err.status = 400;
+      next(err);
+    })
+});
+
 app.use('/upload', upload);
 
 // catch 404 and forward to error handler

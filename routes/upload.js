@@ -22,9 +22,16 @@ const getBlobName = originalName => {
   return `${identifier}-${originalName}`;
 };
 
-function uploadFile (file) {
+function uploadFile (file, user) {
   const
-      blobName = getBlobName(file.originalname)
+      dateNow = new Date()
+    , datePathPart = [
+        dateNow.getFullYear(),
+        dateNow.getMonth()+1,
+        dateNow.getDate()
+      ].join('/')
+    , blobPath = `${user.id}/${datePathPart}`
+    , blobName = `${blobPath}/${Date.now()}-${getBlobName(file.originalname)}`
     , blobService = new BlockBlobClient(process.env.AZURE_STORAGE_CONNECTION_STRING,containerName,blobName)
     , stream = getStream(file.buffer)
     , streamLength = file.buffer.length
@@ -39,9 +46,10 @@ function uploadFile (file) {
 router.post('/', upload.array('files'), (req, res) => {
   const resultUris = [];
   const files = [...req.files];
+
   const uploads = files.map(file => {
     console.log(file);
-    const upload = uploadFile(file)
+    const upload = uploadFile(file, req.user)
     resultUris.push(
       `${process.env.AZURE_STORAGE_CONTAINER_URI_PREFIX}/${upload.blobName}`
     )
