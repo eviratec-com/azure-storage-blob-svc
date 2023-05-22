@@ -25,36 +25,46 @@ app.use(cookieParser());
 
 app.use(cors(corsConfig));
 
-function verifyEviratecToken (req) {
-  return new Promise((resolve, reject) => {
-    const ep = process.env.EVIRATEC_TOKEN_VERIFICATION_ENDPOINT
-    const headers = {
-      'X-Eviratec-Token': req.headers['x-eviratec-token'],
-      'Content-Type': 'application/json',
-    }
+function verificationFunction (tokenKey, verificationEp) {
+  return function verifyEviratecToken (req) {
+    return new Promise((resolve, reject) => {
+      const ep = verificationEp
+      const headers = {
+        'Content-Type': 'application/json',
+      }
 
-    fetch(ep, { method: 'GET', headers: headers })
-      .then((result) => {
-        if (400 === result.status) {
-          return result.json().then(json => {
-            const e = new Error(json.message)
-            reject(e)
-          })
-        }
+      headers[tokenKey] =  req.headers[tokenKey]
 
-        result.json()
-          .then(json => resolve(json))
-          .catch(err => reject(err))
-      })
-      .catch(err => reject(err))
-  })
+      fetch(ep, { method: 'GET', headers: headers })
+        .then((result) => {
+          if (400 === result.status) {
+            return result.json().then(json => {
+              const e = new Error(json.message)
+              reject(e)
+            })
+          }
+
+          result.json()
+            .then(json => resolve(json))
+            .catch(err => reject(err))
+        })
+        .catch(err => reject(err))
+    })
+  }
 }
 
-// verify auth
+// get callback headers
+// to verify auth
 app.use((req, res, next) => {
+  const verifyEviratecToken = verificationFunction(
+    req.headers['x-token-header'],
+    req.headers['x-callback-url']
+  )
+
   verifyEviratecToken(req)
     .then((user) => {
       req.user = user;
+      req.site = req.headers['x-esp-site-id']);
       next();
     })
     .catch((e) => {
@@ -64,6 +74,7 @@ app.use((req, res, next) => {
       next(err);
     })
 });
+
 
 app.use('/upload', upload);
 
