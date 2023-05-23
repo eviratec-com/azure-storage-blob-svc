@@ -73,7 +73,7 @@ app.use((req, res, next) => {
   verifyEviratecToken(req)
     .then((user) => {
       req.user = user;
-      req.site = req.headers['x-esp-site-id']);
+      req.site = req.headers['x-esp-site-id'];
       next();
     })
     .catch((e) => {
