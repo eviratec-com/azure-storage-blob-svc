@@ -12,7 +12,14 @@ const app = express();
 const corsConfig = {
   // origin: [/localhost\:3000$/, /www\.eviratec\.com\.au$/],
   origin: '*',
-  allowedHeaders: ['X-Eviratec-Token', 'Content-Type'],
+  allowedHeaders: [
+    'X-Eviratec-Token',
+    'Content-Type',
+    'X-Token-Header',
+    'X-Eviratecnet-Token',
+    'X-Callback-Url',
+    'X-Esp-Site-Id',
+  ],
   optionsSuccessStatus: 200
 }
 
@@ -33,8 +40,10 @@ function verificationFunction (tokenKey, verificationEp) {
         'Content-Type': 'application/json',
       }
 
-      headers[tokenKey] =  req.headers[tokenKey]
+      const tokenKeyLc = tokenKey.toLowerCase()
 
+      headers[tokenKey] =  req.headers[tokenKeyLc]
+console.log(tokenKey, verificationEp, tokenKey, tokenKeyLc, headers)
       fetch(ep, { method: 'GET', headers: headers })
         .then((result) => {
           if (400 === result.status) {
